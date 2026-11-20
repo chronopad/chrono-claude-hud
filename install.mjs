@@ -1,4 +1,4 @@
-// `hud install`: points Claude Code's statusLine at claude-hud, using the runtime running this. A
+// `hud install`: points Claude Code's statusLine at chrono-claude-hud, using the runtime running this. A
 // capability, so it runs outside the cage, and the skill never pre-approves it: Claude Code asks
 // the user first. Plugins can't set statusLine themselves, so this writes the user's settings.json.
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ function buildCommand(shell, launcher, env = process.env) {
   if (shell === 'gitbash') {
     // Launch through cmd.exe: Git Bash creates native children suspended, so a
     // killed statusLine shell would otherwise strand a node.exe (#747).
-    return 'exec "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-hud/statusline.cmd"';
+    return 'exec "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/chrono-claude-hud/statusline.cmd"';
   }
   if (shell === 'powershell') {
     const cmd = path.win32.join(env.SystemRoot || 'C:\\Windows', 'System32', 'cmd.exe');
@@ -51,7 +51,7 @@ export function install({ configDir, argv = [], env = process.env }) {
   const shell = flag('--shell') ?? detectShell(env);
   if (!SHELLS.includes(shell)) throw new Error(`--shell must be one of ${SHELLS.join(', ')}`);
 
-  const hudDir = path.join(configDir, 'plugins', 'claude-hud');
+  const hudDir = path.join(configDir, 'plugins', 'chrono-claude-hud');
   const launcher = path.join(hudDir, 'statusline.mjs');
   const settingsPath = path.join(configDir, 'settings.json');
   const settings = readSettings(settingsPath);

@@ -31,7 +31,7 @@ const run = (file, args, { configDir, pluginsDir, cwd, columns } = {}) => spawnS
 });
 
 async function fakeInstall(configDir, version, pluginsDir = path.join(configDir, 'plugins')) {
-  const dist = path.join(pluginsDir, 'cache', 'market', 'claude-hud', version, 'dist');
+  const dist = path.join(pluginsDir, 'cache', 'market', 'chrono-claude-hud', version, 'dist');
   await mkdir(dist, { recursive: true });
   await writeFile(path.join(dist, '..', 'package.json'), '{"type":"module"}');
   await writeFile(
@@ -44,7 +44,7 @@ test('launcher runs the newest installed version and pads COLUMNS', async () => 
   await withConfigDir(async (configDir) => {
     await fakeInstall(configDir, '0.9.0');
     await fakeInstall(configDir, '0.10.0');
-    await mkdir(path.join(configDir, 'plugins', 'cache', 'market', 'claude-hud', '0.11.0'), { recursive: true });
+    await mkdir(path.join(configDir, 'plugins', 'cache', 'market', 'chrono-claude-hud', '0.11.0'), { recursive: true });
 
     const result = run(launcher, [], { configDir, columns: '120' });
     assert.equal(result.status, 0, result.stderr);
@@ -94,7 +94,7 @@ test('install replaces another status line only with --replace, and keeps other 
     assert.equal(result.status, 0, result.stderr);
     const report = JSON.parse(result.stdout);
     const settings = JSON.parse(await readFile(settingsPath, 'utf8'));
-    const installedLauncher = path.join(configDir, 'plugins', 'claude-hud', 'statusline.mjs');
+    const installedLauncher = path.join(configDir, 'plugins', 'chrono-claude-hud', 'statusline.mjs');
 
     assert.equal(settings.model, 'opus');
     assert.deepEqual(settings.statusLine, {
@@ -159,10 +159,10 @@ test('Windows shells launch through cmd.exe', async () => {
     assert.equal(gitBash.status, 0, gitBash.stderr);
     assert.equal(
       JSON.parse(gitBash.stdout).command,
-      'exec "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/claude-hud/statusline.cmd"',
+      'exec "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/chrono-claude-hud/statusline.cmd"',
     );
     assert.equal(
-      await readFile(path.join(configDir, 'plugins', 'claude-hud', 'statusline.cmd'), 'utf8'),
+      await readFile(path.join(configDir, 'plugins', 'chrono-claude-hud', 'statusline.cmd'), 'utf8'),
       `@echo off\r\n"${process.execPath}" "%~dp0statusline.mjs"\r\n`,
     );
 

@@ -1,0 +1,15 @@
+{
+  "language": "en",
+  "lineLayout": "compact",
+  "projectLineOrder": ["project", "sessionName", "model"],
+  "display": {
+    "showModel": false,
+    "showTodos": true,
+    "usageCompact": true,
+    "customLine": "my-machine",
+    "customLinePosition": "first"
+  },
+  "gitStatus": {
+    "showAheadBehind": true
+  }
+}

@@ -1,4 +1,11 @@
-# Claude HUD
+# Chrono Claude HUD
+
+> A fork of [jarrodwatts/claude-hud](https://github.com/jarrodwatts/claude-hud) (MIT). Everything below is upstream's HUD, with these differences:
+>
+> - **Git segment** is `[main +2 ~3 ↑1 ↓1]`: staged (`+`) and unstaged (`~`) tracked-file counts replace the `*` dirty flag. An untracked file alone no longer counts as dirty. This replaces `git:(main*)` and `jj:(…)`.
+> - **Detached HEAD** shows as `@abc1234` instead of `detached:abc1234`.
+> - **Breadcrumb**: with `display.customLine` set and `customLinePosition: "first"` in the compact layout, the first segment reads `customLine @ dir > session [git]`.
+> - **Own plugin and config folder**: `chrono-claude-hud`, with config in `~/.claude/plugins/chrono-claude-hud/config.json`, so it doesn't collide with an upstream install. See [`config.example.json`](config.example.json).
 
 A Claude Code plugin that shows what's happening: context usage, rate limits, active tools, running agents, and todo progress, always visible below your input.
 
@@ -14,8 +21,8 @@ A Claude Code plugin that shows what's happening: context usage, rate limits, ac
 Inside Claude Code, run:
 
 ```
-/plugin marketplace add jarrodwatts/claude-hud
-/plugin install claude-hud
+/plugin marketplace add chronopad/chrono-claude-hud
+/plugin install chrono-claude-hud
 /reload-plugins
 /hud
 ```
@@ -26,15 +33,15 @@ Inside Claude Code, run:
 <summary><strong>Prefer the terminal?</strong></summary>
 
 ```bash
-claude plugin marketplace add jarrodwatts/claude-hud
-claude plugin install claude-hud@claude-hud
+claude plugin marketplace add chronopad/chrono-claude-hud
+claude plugin install chrono-claude-hud@chrono-claude-hud
 ```
 
 Then run `/reload-plugins` and `/hud` inside a session.
 
 </details>
 
-**Updates:** Claude Code doesn't auto-update third-party plugins by default. To turn it on, run `/plugin`, open **Marketplaces**, select **claude-hud**, and choose **Enable auto-update**. Or update by hand with `claude plugin marketplace update claude-hud` and `claude plugin update claude-hud@claude-hud`, then `/reload-plugins`. You don't need to set it up again.
+**Updates:** Claude Code doesn't auto-update third-party plugins by default. To turn it on, run `/plugin`, open **Marketplaces**, select **chrono-claude-hud**, and choose **Enable auto-update**. Or update by hand with `claude plugin marketplace update claude-hud` and `claude plugin update claude-hud@claude-hud`, then `/reload-plugins`. You don't need to set it up again.
 
 ## What You See
 

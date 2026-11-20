@@ -1,5 +1,5 @@
-// Runs the newest installed claude-hud. `hud install` (the /hud skill) copies this file to
-// <config dir>/plugins/claude-hud/ so the statusLine command survives updates.
+// Runs the newest installed chrono-claude-hud. `hud install` (the /hud skill) copies this file to
+// <config dir>/plugins/chrono-claude-hud/ so the statusLine command survives updates.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -34,7 +34,7 @@ const compare = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
 let latest;
 for (const marketplace of list(cacheDir)) {
-  const pluginDir = path.join(cacheDir, marketplace, 'claude-hud');
+  const pluginDir = path.join(cacheDir, marketplace, 'chrono-claude-hud');
   for (const name of list(pluginDir)) {
     const version = parseVersion(name);
     const file = path.join(pluginDir, name, entry);

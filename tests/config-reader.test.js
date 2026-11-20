@@ -516,5 +516,5 @@ test('Issue #3: MCP count updates correctly when servers are disabled', async ()
 // === Config cache tests ===
 
 async function getConfigCacheDir(configDir) {
-  return path.join(configDir, 'plugins', 'claude-hud', 'config-cache');
+  return path.join(configDir, 'plugins', 'chrono-claude-hud', 'config-cache');
 }

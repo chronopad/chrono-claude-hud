@@ -22,7 +22,7 @@ function withHome(fn) {
   const run = (args, { input, columns } = {}) => spawnSync(process.execPath, [hud, ...args], {
     cwd: project, input, encoding: 'utf8', env: { ...env, ...(columns ? { COLUMNS: String(columns) } : {}) },
   });
-  const configPath = path.join(configDir, 'plugins', 'claude-hud', 'config.json');
+  const configPath = path.join(configDir, 'plugins', 'chrono-claude-hud', 'config.json');
   try {
     return fn({ home, configDir, project, run, configPath });
   } finally {

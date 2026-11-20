@@ -94,6 +94,24 @@ export function addedDirs(f: Frame, prefix: string, joiner: string): string | nu
 }
 
 /**
+ * chrono: the compact first segment `custom @ dir > session [git]`, built when customLine sits
+ * first. Dir and session name show regardless of showProject/showSessionName; the compact layout
+ * then drops its separate project/session parts. null means "use the upstream parts".
+ */
+export function breadcrumbPart(f: Frame): string | null {
+  const display = f.config?.display;
+  if (!display?.customLine || (display.customLinePosition ?? 'last') !== 'first') return null;
+  const colors = f.config?.colors;
+  const segments = [custom(display.customLine, colors)];
+  if (f.stdin.cwd) segments.push('@', projectColor(formatProjectPath(f.stdin.cwd, f.config?.pathLevels ?? 1), colors));
+  const name = sessionName(f);
+  if (name) segments.push('>', label(name, colors));
+  const vcs = vcsPart(f, 'compact');
+  if (vcs) segments.push(vcs);
+  return segments.join(' ');
+}
+
+/**
  * The project path with its VCS segment, as one part or, with
  * branchOverflow "wrap", two. Expanded links the path and inlines added dirs.
  */

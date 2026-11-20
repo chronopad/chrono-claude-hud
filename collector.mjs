@@ -28,7 +28,7 @@ const homeOf = (env) => (process.platform === 'win32' ? env.USERPROFILE : env.HO
 export function claudePaths(env = process.env, home = homeOf(env)) {
   const custom = env.CLAUDE_CONFIG_DIR?.trim();
   const configDir = custom ? path.resolve(expandHome(custom, home)) : path.join(home, '.claude');
-  const hudDir = path.join(configDir, 'plugins', 'claude-hud');
+  const hudDir = path.join(configDir, 'plugins', 'chrono-claude-hud');
   return {
     home,
     configDir,

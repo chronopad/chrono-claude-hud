@@ -221,31 +221,43 @@ test('projectLineOrder moves keyed parts and keeps unlisted ones after them', ()
   assert.equal(lines(ctx({ stdin, config }))[0], 'hi │ ⏱️  5m │ my-project │ [Opus] │ auth-fix');
 });
 
-const gitStatus = { branch: 'main', isDirty: true, ahead: 3, behind: 1, lineDiff: { added: 12, deleted: 4 }, fileStats: { modified: 2, added: 1, deleted: 1, untracked: 3, trackedFiles: [] } };
+const gitStatus = { branch: 'main', isDirty: true, ahead: 3, behind: 1, lineDiff: { added: 12, deleted: 4 }, fileStats: { modified: 2, added: 1, deleted: 1, untracked: 3, staged: 2, unstaged: 3, trackedFiles: [] } };
 const gitConfig = { gitStatus: { showAheadBehind: true, showFileStats: true, showWorktree: true, pushWarningThreshold: 2, pushCriticalThreshold: 3 } };
 
 test('git shows line diffs in expanded and file counts in compact', () => {
   const stdin = { workspace: { git_worktree: 'feature-x' } };
-  assert.equal(lines(ctx({ gitStatus, stdin, config: gitConfig }))[0], '[Opus] │ my-project git:(main* ↑3 ↓1 [+12 -4]) ⎇ feature-x');
-  assert.equal(lines(ctx({ gitStatus, stdin, config: compact(gitConfig) }))[0], '[Opus] █████░░░░░ 45% | my-project git:(main* ↑3 ↓1 !2 +1 ✘1 ?3) ⎇ feature-x');
+  assert.equal(lines(ctx({ gitStatus, stdin, config: gitConfig }))[0], '[Opus] │ my-project [main +2 ~3 ↑3 ↓1 [+12 -4]] ⎇ feature-x');
+  assert.equal(lines(ctx({ gitStatus, stdin, config: compact(gitConfig) }))[0], '[Opus] █████░░░░░ 45% | my-project [main +2 ~3 ↑3 ↓1 !2 +1 ✘1 ?3] ⎇ feature-x');
   assert.ok(raw(ctx({ gitStatus, config: gitConfig }))[0].includes(`${RED}↑3`), 'at the critical threshold');
   assert.equal(lines(ctx({ gitStatus, config: { gitStatus: { enabled: false } } }))[0], '[Opus] │ my-project');
 });
 
 test('git branchOverflow wrap puts git in its own part', () => {
   const config = { gitStatus: { branchOverflow: 'wrap' } };
-  assert.equal(lines(ctx({ gitStatus, config }))[0], '[Opus] │ my-project │ git:(main*)');
-  assert.deepEqual(lines(ctx({ gitStatus, config }), 15).slice(0, 3), ['[Opus]', 'my-project', 'git:(main*)']);
+  assert.equal(lines(ctx({ gitStatus, config }))[0], '[Opus] │ my-project │ [main +2 ~3]');
+  assert.deepEqual(lines(ctx({ gitStatus, config }), 15).slice(0, 3), ['[Opus]', 'my-project', '[main +2 ~3]']);
 });
 
 test('jj has its own toggle, a conflict marker, and no git-only details', () => {
   const jj = { ...gitStatus, vcs: 'jj', conflict: true, branchUrl: 'https://github.com/a/b/tree/main' };
   const config = { ...gitConfig, jjStatus: { enabled: true } };
   const stdin = { workspace: { git_worktree: 'feature-x' } };
-  assert.equal(lines(ctx({ gitStatus: jj, stdin, config }))[0], '[Opus] │ my-project jj:(main* !conflict)');
+  assert.equal(lines(ctx({ gitStatus: jj, stdin, config }))[0], '[Opus] │ my-project [main !conflict]');
   assert.ok(!raw(ctx({ gitStatus: jj, config }))[0].includes('github.com'), 'no branch link');
   assert.equal(lines(ctx({ gitStatus: jj, config: gitConfig }))[0], '[Opus] │ my-project');
-  assert.equal(lines(ctx({ gitStatus: jj, config: { jjStatus: { enabled: true, showConflicts: false, showDirty: false } } }))[0], '[Opus] │ my-project jj:(main)');
+  assert.equal(lines(ctx({ gitStatus: jj, config: { jjStatus: { enabled: true, showConflicts: false, showDirty: false } } }))[0], '[Opus] │ my-project [main]');
+});
+
+test('customLine first builds the compact breadcrumb: custom @ dir > session [git]', () => {
+  const config = compact({ display: { customLine: 'box', customLinePosition: 'first' }, gitStatus: { showAheadBehind: true } });
+  const stdin = { session_name: 'auth-fix' };
+  assert.equal(lines(ctx({ gitStatus, stdin, config }))[0], 'box @ my-project > auth-fix [main +2 ~3 ↑3 ↓1] | [Opus] █████░░░░░ 45%');
+  // dir and session show even when their own toggles are off, and are not repeated later in the line
+  const quiet = compact({ display: { customLine: 'box', customLinePosition: 'first', showProject: false, showSessionName: false } });
+  assert.equal(lines(ctx({ stdin, config: quiet }))[0], 'box @ my-project > auth-fix | [Opus] █████░░░░░ 45%');
+  // a last-position customLine keeps the upstream layout
+  const last = compact({ display: { customLine: 'box' } });
+  assert.ok(!lines(ctx({ gitStatus, stdin, config: last }))[0].includes('@ my-project'));
 });
 
 test("the git files line keeps git's order and hides below 60 columns", () => {

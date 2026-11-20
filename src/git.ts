@@ -20,6 +20,10 @@ export interface FileStats {
   added: number;
   deleted: number;
   untracked: number;
+  /** Tracked files with a change in the index (staged). */
+  staged: number;
+  /** Tracked files with a change in the worktree (unstaged). */
+  unstaged: number;
   trackedFiles: TrackedFile[];
 }
 
@@ -75,6 +79,8 @@ export async function getGitStatus(ask: Ask, options: GitStatusOptions = {}): Pr
     behind: parsed.behind,
     branchUrl: githubRefUrl(options.repo, branch),
   };
+  // chrono: untracked-only repos are not dirty but still report their `?n` count.
+  if (parsed.fileStats.untracked > 0) status.fileStats = parsed.fileStats;
   if (!parsed.dirty) return status;
 
   status.fileStats = parsed.fileStats;
@@ -108,7 +114,8 @@ async function getBranchOnly(ask: Ask, repo: GitRepoIdentity | null | undefined)
 async function describeDetachedHead(ask: Ask, oid: string | null): Promise<string | null> {
   const tag = stdoutOf(await run(ask, 'git.describe'))?.trim();
   if (tag) return tag;
-  return oid && /^[0-9a-f]{7,}$/.test(oid) ? `detached:${oid.slice(0, 7)}` : null;
+  // chrono: marker is `@<sha>`, was `detached:<sha>`; shorter for the bracketed segment.
+  return oid && /^[0-9a-f]{7,}$/.test(oid) ? `@${oid.slice(0, 7)}` : null;
 }
 
 const GITHUB_NAME = /^[A-Za-z0-9_.-]+$/;
@@ -118,7 +125,7 @@ function githubRefUrl(repo: GitRepoIdentity | null | undefined, ref: string): st
     return undefined;
   }
   const base = `https://github.com/${repo.owner}/${repo.name}`;
-  const sha = /^detached:([0-9a-f]+)$/.exec(ref)?.[1];
+  const sha = /^@([0-9a-f]+)$/.exec(ref)?.[1];
   return sha ? `${base}/commit/${sha}` : `${base}/tree/${ref.split('/').map(encodeURIComponent).join('/')}`;
 }
 
@@ -141,7 +148,7 @@ export function parseStatus(output: string): ParsedStatus {
     ahead: 0,
     behind: 0,
     dirty: false,
-    fileStats: { modified: 0, added: 0, deleted: 0, untracked: 0, trackedFiles: [] },
+    fileStats: { modified: 0, added: 0, deleted: 0, untracked: 0, staged: 0, unstaged: 0, trackedFiles: [] },
   };
   const stats = parsed.fileStats;
   const records = output.split('\0');
@@ -160,12 +167,15 @@ export function parseStatus(output: string): ParsedStatus {
         parsed.behind = Number(match[2]);
       }
     } else if (record.startsWith('? ')) {
-      parsed.dirty = true;
+      // chrono: an untracked file alone is not dirty (upstream sets dirty here).
       stats.untracked++;
     } else if (record[1] === ' ' && record[0] in PATH_FIELD) {
       parsed.dirty = true;
       const fullPath = pathAfterFields(record, PATH_FIELD[record[0]]);
       if (record[0] === '2') i++; // A rename or copy is followed by its original path.
+      // chrono: porcelain v2 writes '.' for "no change" in the index (record[2]) / worktree (record[3]) column.
+      if (record[2] !== '.') stats.staged++;
+      if (record[3] !== '.') stats.unstaged++;
       const type = classify(record[2], record[3]);
       if (!type) continue;
       stats[type]++;

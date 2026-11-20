@@ -7,7 +7,7 @@ import { contextBarAndValue, tokenBreakdown } from './context.ts';
 import { cacheHitRateLine, promptCacheLine, sessionTimeLine } from './lines.ts';
 import { orderParts } from './order.ts';
 import {
-  advisorPart, authPart, compactionsPart, configCountParts, costPart, customLinePart, durationPart, extraPart,
+  advisorPart, authPart, breadcrumbPart, compactionsPart, configCountParts, costPart, customLinePart, durationPart, extraPart,
   modelBadge, projectParts, sessionNamePart, sessionTokensSummary, speedPart, versionPart, type Part,
 } from './parts.ts';
 import { usageParts } from './usage.ts';
@@ -26,10 +26,13 @@ function sessionLine(f: Frame): string {
   const add = (text: string | null, key: Part['key'] = null): void => {
     if (text) parts.push({ key, text });
   };
-  add(customLinePart(f, 'first'));
+  const breadcrumb = breadcrumbPart(f); // chrono: replaces the custom, project and session parts
+  add(breadcrumb ?? customLinePart(f, 'first'));
   add(modelCluster(f), 'model');
-  for (const part of projectParts(f, 'compact')) add(part, 'project');
-  add(sessionNamePart(f), 'sessionName');
+  if (!breadcrumb) {
+    for (const part of projectParts(f, 'compact')) add(part, 'project');
+    add(sessionNamePart(f), 'sessionName');
+  }
   add(versionPart(f), 'version');
   configCountParts(f).forEach((part) => add(part));
   (usageParts(f, 'compact') ?? []).forEach((part) => add(part));

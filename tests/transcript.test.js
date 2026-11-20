@@ -433,7 +433,7 @@ test('deleting a named task keeps duplicate-content TaskCreate IDs through TodoW
 test('the CLI drops deleted tasks from progress and hides an empty task list', async () => {
   const dir = await mkdtemp(path.join(tmpdir(), 'hud-task-delete-cli-'));
   try {
-    const configDir = path.join(dir, 'plugins', 'claude-hud');
+    const configDir = path.join(dir, 'plugins', 'chrono-claude-hud');
     await mkdir(configDir, { recursive: true });
     await writeFile(path.join(configDir, 'config.json'), JSON.stringify({
       gitStatus: { enabled: false }, display: { showTodos: true },

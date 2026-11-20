@@ -15,7 +15,8 @@ function aheadCount(f: Frame, ahead: number): string {
 }
 
 /**
- * `git:(main* ↑2)` or `jj:(…)`, plus the worktree name. Expanded adds line diffs;
+ * chrono: `[main +1 ~2 ↑2]` (branch, staged, unstaged, ahead/behind), plus the worktree name.
+ * Upstream prints `git:(main* ↑2)` / `jj:(…)`; the `*` flag became the staged/unstaged counts. Expanded adds line diffs;
  * compact adds Starship-style file counts instead. jj never shows git-only details.
  */
 export function vcsPart(f: Frame, layout: Layout): string | null {
@@ -27,9 +28,13 @@ export function vcsPart(f: Frame, layout: Layout): string | null {
   if (!(isJj ? jj.enabled : git.enabled)) return null;
 
   const colors = f.config?.colors;
-  const dirty = (isJj ? jj.showDirty : git.showDirty) && status.isDirty;
-  const branch = safeHyperlink(isJj ? undefined : status.branchUrl, gitBranch(`${sanitizeDisplayText(status.branch)}${dirty ? '*' : ''}`, colors));
+  const showDirty = isJj ? jj.showDirty : git.showDirty;
+  const branch = safeHyperlink(isJj ? undefined : status.branchUrl, gitBranch(sanitizeDisplayText(status.branch), colors));
   const inner = [branch];
+
+  const { staged = 0, unstaged = 0 } = !isJj && showDirty ? status.fileStats ?? {} : {};
+  if (staged > 0) inner.push(gitBranch(`+${staged}`, colors));
+  if (unstaged > 0) inner.push(gitBranch(`~${unstaged}`, colors));
 
   if (!isJj && git.showAheadBehind) {
     if (status.ahead > 0) inner.push(aheadCount(f, status.ahead));
@@ -53,7 +58,7 @@ export function vcsPart(f: Frame, layout: Layout): string | null {
 
   const worktreeName = !isJj && git.showWorktree ? sanitizeDisplayText(f.stdin.workspace?.git_worktree ?? '').trim() : '';
   const worktree = worktreeName ? ` ${gitColor(`⎇ ${worktreeName}`, colors)}` : '';
-  return `${gitColor(isJj ? 'jj:(' : 'git:(', colors)}${inner.join(' ')}${gitColor(')', colors)}${worktree}`;
+  return `${gitColor('[', colors)}${inner.join(' ')}${gitColor(']', colors)}${worktree}`;
 }
 
 function insideCwd(cwd: string, candidate: string): string | null {

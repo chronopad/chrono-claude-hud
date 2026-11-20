@@ -37,9 +37,9 @@ const envFor = (home, configDir) => ({ PATH: [path.dirname(process.execPath), pr
 
 function render(runtime, args) {
   return withHome((home, configDir) => {
-    const version = path.join(configDir, 'plugins', 'cache', 'claude-hud', 'claude-hud', '0.14.2');
+    const version = path.join(configDir, 'plugins', 'cache', 'chrono-claude-hud', 'chrono-claude-hud', '0.14.2');
     for (const name of INSTALLED) fs.cpSync(path.join(root, name), path.join(version, name), { recursive: true });
-    const launcher = path.join(configDir, 'plugins', 'claude-hud', 'statusline.mjs');
+    const launcher = path.join(configDir, 'plugins', 'chrono-claude-hud', 'statusline.mjs');
     fs.cpSync(path.join(root, 'scripts', 'statusline.mjs'), launcher);
     return spawnSync(runtime, [...args, launcher], { input: STDIN, encoding: 'utf8', env: envFor(home, configDir) });
   });

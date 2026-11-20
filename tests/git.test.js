@@ -77,7 +77,7 @@ test('getGitStatus counts modified, added, deleted, renamed, and untracked files
     const status = await getGitStatus(dir);
     assert.equal(status?.isDirty, true);
     const { trackedFiles, ...counts } = status.fileStats;
-    assert.deepEqual(counts, { modified: 2, added: 1, deleted: 1, untracked: 1 });
+    assert.deepEqual(counts, { modified: 2, added: 1, deleted: 1, untracked: 1, staged: 2, unstaged: 2 });
     assert.deepEqual(
       trackedFiles.map((file) => `${file.type}:${file.fullPath}`).sort(),
       ['added:staged.txt', 'deleted:gone.txt', 'modified:keep.txt', 'modified:new name.txt'],
@@ -158,7 +158,37 @@ test('getGitStatus names a detached HEAD by tag, else by short sha', async () =>
 
     git('commit', '-q', '--allow-empty', '-m', 'untagged');
     const sha = git('rev-parse', 'HEAD').trim();
-    assert.equal((await getGitStatus(dir))?.branch, `detached:${sha.slice(0, 7)}`);
+    assert.equal((await getGitStatus(dir))?.branch, `@${sha.slice(0, 7)}`);
+  });
+});
+
+test('an untracked file alone is not dirty, but is still counted', async () => {
+  await withRepo(async ({ dir, git, write }) => {
+    await write('a.txt', 'a\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'a');
+    await write('new.txt', 'x\n');
+    const status = await getGitStatus(dir);
+    assert.equal(status?.isDirty, false);
+    assert.equal(status?.fileStats?.untracked, 1);
+    assert.equal(status?.fileStats?.staged, 0);
+    assert.equal(status?.fileStats?.unstaged, 0);
+  });
+});
+
+test('an unstaged-only first record counts as unstaged, and a file changed on both sides counts on both', async () => {
+  await withRepo(async ({ dir, git, write }) => {
+    await write('a.txt', 'a\n');
+    await write('b.txt', 'b\n');
+    git('add', '.');
+    git('commit', '-q', '-m', 'ab');
+    await write('a.txt', 'a2\n'); // unstaged only, and sorts first
+    await write('b.txt', 'b2\n');
+    git('add', 'b.txt');
+    await write('b.txt', 'b3\n'); // staged and unstaged
+    const stats = (await getGitStatus(dir))?.fileStats;
+    assert.equal(stats?.staged, 1);
+    assert.equal(stats?.unstaged, 2);
   });
 });
 

@@ -55,11 +55,11 @@ test('a rule linked from outside the grants skips only itself', {
   const base = await realpath(await mkdtemp(path.join(tmpdir(), 'hud-rules-')));
   try {
     const cfg = path.join(base, 'cfg');
-    await mkdir(path.join(cfg, 'plugins', 'claude-hud'), { recursive: true });
+    await mkdir(path.join(cfg, 'plugins', 'chrono-claude-hud'), { recursive: true });
     await mkdir(path.join(cfg, 'rules'));
     await mkdir(path.join(base, 'elsewhere'));
     await mkdir(path.join(base, 'proj'));
-    await writeFile(path.join(cfg, 'plugins', 'claude-hud', 'config.json'), '{"display":{"showConfigCounts":true}}');
+    await writeFile(path.join(cfg, 'plugins', 'chrono-claude-hud', 'config.json'), '{"display":{"showConfigCounts":true}}');
     await writeFile(path.join(base, 'elsewhere', 'a.md'), 'pack\n');
     // Named to sort first, so a denied link used to end the count before the plain files.
     await symlink(path.join(base, 'elsewhere', 'a.md'), path.join(cfg, 'rules', 'a.md'));

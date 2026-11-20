@@ -27,8 +27,8 @@ async function render(c) {
     const project = path.join(home, cwd ? cwd.split(/[\\/]/).filter(Boolean).pop() : 'project');
     fs.mkdirSync(project, { recursive: true });
     if (c.config) {
-      fs.mkdirSync(path.join(home, '.claude', 'plugins', 'claude-hud'), { recursive: true });
-      fs.writeFileSync(path.join(home, '.claude', 'plugins', 'claude-hud', 'config.json'), JSON.stringify(c.config));
+      fs.mkdirSync(path.join(home, '.claude', 'plugins', 'chrono-claude-hud'), { recursive: true });
+      fs.writeFileSync(path.join(home, '.claude', 'plugins', 'chrono-claude-hud', 'config.json'), JSON.stringify(c.config));
     }
     // The reported cwd becomes a real folder with the same name.
     const quoted = (s) => JSON.stringify(s).slice(1, -1);

@@ -256,10 +256,10 @@ test('legacy layout keys migrate unless lineLayout is set', () => {
 
 test('config paths follow CLAUDE_CONFIG_DIR, with the override outside plugins/', async () => {
   await withConfigDir(async (dir) => {
-    assert.equal(getConfigPath(), path.join(dir, 'plugins', 'claude-hud', 'config.json'));
+    assert.equal(getConfigPath(), path.join(dir, 'plugins', 'chrono-claude-hud', 'config.json'));
     assert.equal(getConfigOverridePath(), path.join(dir, 'claude-hud.json'));
   });
-  assert.equal(getConfigPath(), path.join(os.homedir(), '.claude', 'plugins', 'claude-hud', 'config.json'));
+  assert.equal(getConfigPath(), path.join(os.homedir(), '.claude', 'plugins', 'chrono-claude-hud', 'config.json'));
   assert.equal(getConfigOverridePath(), path.join(os.homedir(), '.claude', 'claude-hud.json'));
 });
 
@@ -319,7 +319,7 @@ test('loadConfig keeps overrides isolated when config directories share plugins/
   const root = await mkdtemp(path.join(os.tmpdir(), 'claude-hud-shared-plugins-'));
   try {
     const sharedPlugins = path.join(root, 'shared', 'plugins');
-    await writeJson(path.join(sharedPlugins, 'claude-hud', 'config.json'), { lineLayout: 'compact' });
+    await writeJson(path.join(sharedPlugins, 'chrono-claude-hud', 'config.json'), { lineLayout: 'compact' });
     const linkType = process.platform === 'win32' ? 'junction' : 'dir';
     const configs = {};
     for (const name of ['work', 'personal']) {

@@ -98,7 +98,7 @@ test('a reached limit replaces the windows; compact drops the Usage label', () =
   );
   assert.match(lines(ctx({ usageData: data, config: compact() }))[0], /my-project \| ⚠ Limit reached \(resets in 1h 30m\) \| Fable .* \| ¥6\.35$/);
   assert.match(lines(ctx({ usageData: usage({ sevenDay: 100, sevenDayResetAt: null }) }))[1], /Usage ⚠ Limit reached$/);
-  assert.match(lines(ctx({ usageData: data, config: { display: { usageCompact: true } } }))[1], /│ ⚠ Limit \(1h 30m\) \| Fable: 60% \(1d 6h\) \| ¥6\.35$/);
+  assert.match(lines(ctx({ usageData: data, config: { display: { usageCompact: true } } }))[1], /│ ⚠ Limit \(1h 30m\) \| Fable: ██████░░░░ 60% \(1d 6h\) \| ¥6\.35$/);
 });
 
 test('below usageThreshold only a balance remains', () => {
@@ -251,10 +251,14 @@ test('jj has its own toggle, a conflict marker, and no git-only details', () => 
 test('customLine first builds the compact breadcrumb: custom @ dir > session [git]', () => {
   const config = compact({ display: { customLine: 'box', customLinePosition: 'first' }, gitStatus: { showAheadBehind: true } });
   const stdin = { session_name: 'auth-fix' };
-  assert.equal(lines(ctx({ gitStatus, stdin, config }))[0], 'box @ my-project > auth-fix [main +2 ~3 ↑3 ↓1] | [Opus] █████░░░░░ 45%');
-  // dir and session show even when their own toggles are off, and are not repeated later in the line
+  // line 1 is the breadcrumb; line 2 holds the model and bars, space-joined
+  assert.deepEqual(lines(ctx({ gitStatus, stdin, config })).slice(0, 2), ['box @ my-project > auth-fix [main +2 ~3 ↑3 ↓1]', '[Opus] █████░░░░░ 45%']);
+  // dir and session show even when their own toggles are off, and are not repeated later
   const quiet = compact({ display: { customLine: 'box', customLinePosition: 'first', showProject: false, showSessionName: false } });
-  assert.equal(lines(ctx({ stdin, config: quiet }))[0], 'box @ my-project > auth-fix | [Opus] █████░░░░░ 45%');
+  assert.deepEqual(lines(ctx({ stdin, config: quiet })).slice(0, 2), ['box @ my-project > auth-fix', '[Opus] █████░░░░░ 45%']);
+  // usageCompact swaps the 5h:/7d: labels for bars, joined by spaces on line 2
+  const withUsage = compact({ display: { customLine: 'box', customLinePosition: 'first', usageCompact: true } });
+  assert.equal(lines(ctx({ stdin, config: withUsage, usageData: usage({ fiveHour: 25 }) }))[1], '[Opus] █████░░░░░ 45% ███░░░░░░░ 25% (1h 30m)');
   // a last-position customLine keeps the upstream layout
   const last = compact({ display: { customLine: 'box' } });
   assert.ok(!lines(ctx({ gitStatus, stdin, config: last }))[0].includes('@ my-project'));

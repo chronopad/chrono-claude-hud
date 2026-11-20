@@ -29,9 +29,9 @@ function formatWindow(f: Frame, layout: Layout, w: UsageWindow, align: LabelAlig
   const reset = formatWindowTime(w.resetAt, w.windowMs, timeFormat, wallClock(display), f.now);
 
   if (display?.usageCompact) {
-    return reset
-      ? `${label(`${w.label}:`, colors)} ${percent} ${label(`(${reset})`, colors)}`
-      : `${label(`${w.label}:`, colors)} ${percent}`;
+    // chrono: a bar replaces the "5h:"/"7d:" label; scoped model windows keep their label to tell them apart.
+    const lead = `${w.forceLabel && w.durationLabel ? `${label(`${w.label}:`, colors)} ` : ''}${quotaBar(w.percent ?? 0, f.barWidth, colors, w.pace)}`;
+    return reset ? `${lead} ${percent} ${label(`(${reset})`, colors)}` : `${lead} ${percent}`;
   }
 
   const elapsedMode = timeFormat === 'elapsed' || timeFormat === 'elapsedAndAbsolute';

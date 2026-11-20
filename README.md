@@ -5,7 +5,8 @@
 > - **Git segment** is `[main +2 ~3 ↑1 ↓1]`: staged (`+`) and unstaged (`~`) tracked-file counts replace the `*` dirty flag. An untracked file alone no longer counts as dirty. This replaces `git:(main*)` and `jj:(…)`.
 > - **Detached HEAD** shows as `@abc1234` instead of `detached:abc1234`.
 > - **Breadcrumb**: with `display.customLine` set and `customLinePosition: "first"` in the compact layout, the first segment reads `customLine @ dir > session [git]`.
-> - **Own plugin and config folder**: `chrono-claude-hud`, with config in `~/.claude/plugins/chrono-claude-hud/config.json`, so it doesn't collide with an upstream install. See [`config.example.json`](config.example.json).
+> - **Compact layout**: with the breadcrumb on, the bars go on a second line, space-joined; with `display.usageCompact`, the `5h:` / `7d:` labels become bars (`███░░░░░░░ 32% (2h)`).
+- **Own plugin and config folder**: `chrono-claude-hud`, with config in `~/.claude/plugins/chrono-claude-hud/config.json`, so it doesn't collide with an upstream install. See [`config.example.json`](config.example.json).
 
 A Claude Code plugin that shows what's happening: context usage, rate limits, active tools, running agents, and todo progress, always visible below your input.
 

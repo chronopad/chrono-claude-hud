@@ -21,7 +21,7 @@ function modelCluster(f: Frame): string {
   return [display?.showModel !== false ? modelBadge(f) : null, bar, value].filter(Boolean).join(' ');
 }
 
-function sessionLine(f: Frame): string {
+function sessionLines(f: Frame): string[] {
   const parts: Part[] = [];
   const add = (text: string | null, key: Part['key'] = null): void => {
     if (text) parts.push({ key, text });
@@ -48,17 +48,21 @@ function sessionLine(f: Frame): string {
   add(extraPart(f), 'extra');
   add(authPart(f), 'auth');
   add(customLinePart(f, 'last'));
-  const line = orderParts(parts, f.config?.projectLineOrder ?? DEFAULT_PROJECT_LINE_ORDER).join(' | ');
-  return line + tokenBreakdown(f);
+  const ordered = orderParts(parts, f.config?.projectLineOrder ?? DEFAULT_PROJECT_LINE_ORDER);
+  if (breadcrumb && ordered.length > 1) {
+    // chrono: the breadcrumb is line 1; everything else (context, usage bars, ...) is line 2, space-joined.
+    return [ordered[0], ordered.slice(1).join(' ') + tokenBreakdown(f)];
+  }
+  return [ordered.join(' | ') + tokenBreakdown(f)];
 }
 
 /** The compact layout: one session line, then the activity lines. */
 export function compactLines(f: Frame): string[] {
-  const header = sessionLine(f);
+  const header = sessionLines(f);
   const activity = ACTIVITY.map((element) => activityLine(f, element)).filter((line): line is string => !!line);
-  const lines = [header];
+  const lines = [...header];
   if (f.config?.showSeparators && activity.length > 0) {
-    const widest = Math.max(visibleWidth(header), 20);
+    const widest = Math.max(...header.map(visibleWidth), 20);
     lines.push(separatorLine(f.width ? Math.min(widest, f.width) : widest));
   }
   return [...lines, ...activity];

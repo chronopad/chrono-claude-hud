@@ -126,12 +126,12 @@ test('set writes config.json, keeps what it did not touch, and --undo puts it ba
 }));
 
 test('preview renders a candidate config without saving it', () => withHome(({ run, project, configPath }) => {
-  const sample = run(['preview', '--set', 'lineLayout=compact', '--width', '60']);
+  const sample = run(['preview', '--width', '60']);
   assert.equal(sample.status, 0, sample.stdout);
-  assert.match(sample.stdout, /^Preview at 60 columns, with a sample session:\n\[Opus 5\.5\] .*45%/);
+  assert.match(sample.stdout, /^Preview at 60 columns, with a sample session:\n.* @ my-project\n.*45%/);
   assert.doesNotMatch(sample.stdout, /\x1b/);
   assert.ok(!existsSync(configPath));
-  assert.match(run(['preview', '--set', 'language=zh-Hans']).stdout, /上下文/, 'labels follow the candidate config');
+  assert.match(run(['preview', '--set', 'lineLayout=expanded', '--set', 'language=zh-Hans']).stdout, /上下文/, 'labels follow the candidate config');
 
   assert.equal(run(['preview', '--last']).status, 1, 'nothing to replay before a render');
   run([], { input: payload(project), columns: 80 });

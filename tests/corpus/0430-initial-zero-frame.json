@@ -1,6 +1,7 @@
 {
   "note": "Context handling for the initial frame, before Claude Code reports any usage (#430, #460).",
   "columns": 120,
+  "config": {"lineLayout": "expanded"},
   "stdin": {
     "model": {
       "display_name": "Opus 5.5"

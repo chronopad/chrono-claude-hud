@@ -1,7 +1,7 @@
 {
   "note": "Changed files are listed in git's order (#857). The sort by mtime stat'ed files in the cwd, which the cage doesn't grant, so it read outside the grants and never sorted.",
   "columns": 120,
-  "config": { "gitStatus": { "showFileStats": true } },
+  "config": { "lineLayout": "expanded", "gitStatus": { "showFileStats": true } },
   "stdin": {
     "model": { "display_name": "Opus" },
     "cwd": "/home/user/repo"

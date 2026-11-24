@@ -1,3 +1,4 @@
+import os from "node:os";
 import { ask, finish, open, type Ask, type Output, type Paths, type Probe } from "./channel.ts";
 import { getUsageFromStdin, isContextUnreported } from "./stdin.ts";
 import { addSubagentEfforts, parseTranscript } from "./transcript.ts";
@@ -100,6 +101,7 @@ export async function renderStdin(stdin: StdinData, config: HudConfig, { ask, fi
     memoryUsage: "memory" in answers ? getMemoryUsage(readMemory(answers.memory as MemoryFacts)) : null,
     config,
     extraLabel: extraCmdLabel(answers.extra),
+    hostname: os.hostname(),
     authInfo: files && (display.showAuth || display.showAuthUser) ? readAuthInfo(paths.claudeJson) : null,
   }, columns, now);
   const snapshot = externalUsageSnapshot(answers["usage.target"] as UsageTarget, stdinUsage, now);

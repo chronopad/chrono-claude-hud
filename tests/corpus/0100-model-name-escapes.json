@@ -1,6 +1,7 @@
 {
   "note": "The model name is sanitized before display; it reached the terminal raw (CHANGELOG 0.10.0 Security).",
   "columns": 120,
+  "config": {"display": {"showModel": true}},
   "stdin": {
     "model": {
       "display_name": "Opus\u001b[2J\u001b]8;;https://evil.example/\u0007click\u001b]8;;\u000731m"

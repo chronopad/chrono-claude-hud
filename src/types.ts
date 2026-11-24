@@ -200,5 +200,7 @@ export interface RenderContext {
   memoryUsage: MemoryInfo | null;
   config: HudConfig;
   extraLabel: string | null;
+  /** chrono: machine hostname, the breadcrumb's TEXT when customLine is unset. */
+  hostname?: string;
   authInfo?: AuthInfo | null;
 }

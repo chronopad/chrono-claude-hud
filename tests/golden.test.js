@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdtemp, mkdir, writeFile, copyFile, readFile, rm, realpath } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { tmpdir, hostname } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import cases, { NOW_MS } from './golden/cases.mjs';
@@ -92,6 +92,7 @@ async function runCase(spec) {
     return stdout
       .replaceAll(pathToFileURL(base).href, 'file://<BASE>')
       .replaceAll(base, '<BASE>')
+      .replaceAll(hostname(), '<HOST>')
       .replaceAll('\x1b', '\\e')
       .replaceAll(' ', '<NBSP>')
       .trimEnd();

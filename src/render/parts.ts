@@ -100,9 +100,11 @@ export function addedDirs(f: Frame, prefix: string, joiner: string): string | nu
  */
 export function breadcrumbPart(f: Frame): string | null {
   const display = f.config?.display;
-  if (!display?.customLine || (display.customLinePosition ?? 'last') !== 'first') return null;
+  if ((display?.customLinePosition ?? 'last') !== 'first') return null;
+  const text = display?.customLine || sanitizeDisplayText(f.hostname ?? '');
+  if (!text) return null;
   const colors = f.config?.colors;
-  const segments = [custom(display.customLine, colors)];
+  const segments = [custom(text, colors)];
   if (f.stdin.cwd) segments.push('@', projectColor(formatProjectPath(f.stdin.cwd, f.config?.pathLevels ?? 1), colors));
   const name = sessionName(f);
   if (name) segments.push('>', label(name, colors));

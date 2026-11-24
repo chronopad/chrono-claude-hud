@@ -21,6 +21,17 @@ const plain = (s) => s.replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '').replace(/\x1b\][^
 const ago = (ms) => new Date(NOW - ms);
 const from = (ms) => new Date(NOW + ms);
 
+// chrono: the fork's defaults differ from upstream's; these tests pin upstream's layout so each one
+// states only the option it is about. The fork's own defaults are tested at the bottom of this file.
+const UPSTREAM = {
+  lineLayout: 'expanded',
+  projectLineOrder: [],
+  gitStatus: { showAheadBehind: false },
+  display: { showModel: true, showProject: true, showTodos: false, usageCompact: false, sevenDayThreshold: 80, customLinePosition: 'last' },
+};
+const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
+const deepMerge = (a, b) => Object.fromEntries([...new Set([...Object.keys(a), ...Object.keys(b)])].map((k) => [k, isObj(a[k]) && isObj(b[k]) ? deepMerge(a[k], b[k]) : k in b ? b[k] : a[k]]));
+
 function ctx({ config = {}, stdin = {}, transcript = {}, ...rest } = {}) {
   return {
     stdin: {
@@ -41,7 +52,7 @@ function ctx({ config = {}, stdin = {}, transcript = {}, ...rest } = {}) {
     memoryUsage: null,
     extraLabel: null,
     ...rest,
-    config: mergeConfig(config),
+    config: mergeConfig(deepMerge(UPSTREAM, config)),
   };
 }
 
@@ -474,4 +485,14 @@ test('untrusted text cannot emit terminal control sequences', () => {
     assert.doesNotMatch(visible, /[\x00-\x09\x0b-\x1f\x7f-\x9f\u202a-\u202e]/);
     assert.ok(!out.includes('\x1b]52'));
   }
+});
+
+test("chrono defaults: hostname @ dir > session [git] over a bars-only second line", () => {
+  const c = { ...ctx({ stdin: { session_name: 'work' }, usageData: usage() }), hostname: 'box1' };
+  c.config = mergeConfig({});
+  const out = lines(c);
+  assert.equal(out.length, 2);
+  assert.match(out[0], /^box1 @ my-project > work$/);
+  assert.match(out[1], /^\S+ 45% \S+ 25% \(1h 30m\) \S+ 40% \(2d 2h\)$/);
+  assert.doesNotMatch(out.join('\n'), /Context|Usage|resets/);
 });
